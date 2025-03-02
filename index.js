@@ -1,5 +1,4 @@
 const express = require("express");
-const cors = require("cors");
 const app = express();
 let notes = [
   {
@@ -24,7 +23,6 @@ let notes = [
 
 app.use(express.json());
 app.use(express.static("dist"));
-app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("<h1>Hello World!</h1>");
