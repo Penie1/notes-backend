@@ -23,6 +23,7 @@ let notes = [
 ];
 
 app.use(express.json());
+app.use(express.static("dist"));
 app.use(cors());
 
 app.get("/", (req, res) => {
