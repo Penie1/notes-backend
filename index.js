@@ -1,37 +1,18 @@
+require("dotenv").config();
 const express = require("express");
+const mongoose = require("mongoose");
+const Note = require("./models/note");
+
 const app = express();
-let notes = [
-  {
-    id: 1,
-    content: "HTML is easy",
-    date: "2022-01-10T17:30:31.098Z",
-    important: true,
-  },
-  {
-    id: 2,
-    content: "Browser can execute only Javascript",
-    date: "2022-01-10T18:39:34.091Z",
-    important: false,
-  },
-  {
-    id: 3,
-    content: "GET and POST are the most important methods of HTTP protocol",
-    date: "2022-01-10T19:20:14.298Z",
-    important: true,
-  },
-];
 
 app.use(express.json());
 app.use(express.static("dist"));
 
 app.get("/", (req, res) => {
-  res.send("<h1>Hello World!</h1>");
+  Note.find({}).then((notes) => {
+    res.json(notes);
+  });
 });
-
-const generateId = () => {
-  const maxId = notes.length > 0 ? Math.max(...notes.map((n) => n.id)) : 0;
-  return maxId + 1;
-};
 
 app.post("/api/notes", (request, response) => {
   const body = request.body;
@@ -41,21 +22,21 @@ app.post("/api/notes", (request, response) => {
       error: "content missing",
     });
   }
-
-  const note = {
+  const note = new Note({
     content: body.content,
-    important: body.important || false,
-    date: new Date(),
-    id: generateId(),
-  };
+    important: false,
+  });
 
-  notes = notes.concat(note);
-
-  response.json(note);
+  note.save().then((result) => {
+    console.log("note saved!");
+    mongoose.connection.close();
+  });
 });
 
 app.get("/api/notes", (req, res) => {
-  res.json(notes);
+  Note.find({}).then((notes) => {
+    res.json(notes);
+  });
 });
 
 app.delete("/api/notes/:id", (request, response) => {
@@ -76,7 +57,7 @@ app.get("/api/notes/:id", (request, response) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
